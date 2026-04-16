@@ -20,21 +20,17 @@ const int CANTIDAD_ANTORCHAS_INICIALES = 5;
  */
 void inicializar_juego(juego_t *juego){
     obtener_mapa(juego->niveles->paredes, &juego->niveles->tope_paredes, juego->niveles->camino, &juego->niveles->tope_camino, 1);
-    juego->homero.posicion.col = PRIMER_POSICION_COL;
-    juego->homero.posicion.fil = PRIMER_POSICION_FIL;
+    juego->homero.posicion.col = juego->niveles->camino[0].col;
+    juego->homero.posicion.fil = juego->niveles->camino[0].fil;
     //inicializar runa
-    //inicializar altar
     //inicializar posicion del pergamino como random
     juego->homero.recolecto_pergamino = false;
     juego->homero.hechizos_reveladores = CANTIDAD_HECHIZOS_INICIALES;
     juego->homero.vidas_restantes = CANTIDAD_VIDAS_INICIALES;
     juego->homero.antorchas = CANTIDAD_ANTORCHAS_INICIALES;
     juego->homero.antorcha_encendida = false;
-    //srand ((unsigned)time(NULL)); 
-	//int numero = rand() % 20 + 0;
     //inicializar los 5 totems con posiciones randoms
     //obstaculos
-
 }
 
 void mostrar_juego(juego_t juego){
