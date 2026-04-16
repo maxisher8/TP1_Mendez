@@ -7,16 +7,22 @@
 
 const char PARED = 'X';
 const char CAMINO = ' ';
+const char ESPACIO_VACIO = '-';
+const char HOMERO = 'H';
 const int PRIMER_POSICION_COL = 0;
 const int PRIMER_POSICION_FIL = 0;
 const int CANTIDAD_VIDAS_INICIALES = 5;
 const int CANTIDAD_HECHIZOS_INICIALES = 5;
 const int CANTIDAD_ANTORCHAS_INICIALES = 5;
+const char MOVIMIENTO_ARRIBA = 'W';
+const char MOVIMIENTO_IZQUIERDA = 'A';
+const char MOVIMIENTO_ABAJO = 'S';
+const char MOVIMIENTO_DERECHA = 'D';
 
-bool movimiento_valido(juego_t juego, char movimiento);
 
 bool posicion_en_rango(int fil, int col){
-    return (fil >= PRIMER_POSICION_FIL && fil < MAX_FILAS && col >= PRIMER_POSICION_COL && col < MAX_COLUMNAS);
+    bool en_rango = (fil >= PRIMER_POSICION_FIL && fil < MAX_FILAS && col >= PRIMER_POSICION_COL && col < MAX_COLUMNAS);
+    return en_rango;
 }
 
 bool es_pared(juego_t *juego, int fil, int col){
@@ -43,10 +49,6 @@ void inicializar_homero(juego_t *juego){
     juego->homero.antorcha_encendida = false;
 }
 
-/*
- * Pre condiciones: -
- * Post condiciones: Inicializará el juego, cargando toda la información inicial de Homero y de los 3 niveles.
- */
 void inicializar_juego(juego_t *juego){
     juego->nivel_actual = 1;
     juego->tope_niveles = 1;
@@ -64,7 +66,7 @@ void mostrar_juego(juego_t juego){
 
     for (int i = 0; i < MAX_FILAS; i++) {
         for (int j = 0; j < MAX_COLUMNAS; j++) {
-            mapa[i][j] = 'L';
+            mapa[i][j] = ESPACIO_VACIO;
         }
     }
     for (int i = 0; i < nivel_actual.tope_camino; i++) {
@@ -73,8 +75,8 @@ void mostrar_juego(juego_t juego){
     for (int i = 0; i < nivel_actual.tope_paredes; i++) {
         mapa[nivel_actual.paredes[i].fil][nivel_actual.paredes[i].col] = PARED;
     }
-    //pone la posicion de homero en el mapa
-    mapa[juego.homero.posicion.fil][juego.homero.posicion.col] = 'H';
+
+    mapa[juego.homero.posicion.fil][juego.homero.posicion.col] = HOMERO;
     
     for (int i = 0; i < MAX_FILAS; i++) {
         for (int j = 0; j < MAX_COLUMNAS; j++) {
@@ -84,25 +86,35 @@ void mostrar_juego(juego_t juego){
     }
 }
 
+bool movimiento_valido(juego_t juego, char movimiento){
+    bool es_valido = false;
+
+    es_valido = (movimiento == MOVIMIENTO_ARRIBA || movimiento == MOVIMIENTO_IZQUIERDA || movimiento == MOVIMIENTO_ABAJO || movimiento == MOVIMIENTO_DERECHA);
+    if(!es_valido){
+        printf("Movimiento no valido, por favor ingrese un movimiento valido (W, A, S ,D)\n");
+    }
+    return es_valido;
+}
+
 void realizar_jugada(juego_t *juego, char movimiento){
 
     int proxima_fil = juego->homero.posicion.fil;
     int proxima_col = juego->homero.posicion.col;
     
     if(movimiento_valido(*juego, movimiento)){
-        if(movimiento == 'w'){
-            proxima_fil = juego->homero.posicion.fil += -1;
+        if(movimiento == MOVIMIENTO_ARRIBA){
+            proxima_fil += -1;
         }
-        else if(movimiento == 's'){
-            proxima_fil = juego->homero.posicion.fil += 1;
+        else if(movimiento == MOVIMIENTO_ABAJO){
+            proxima_fil += 1;
         }
-        else if(movimiento == 'd'){
-            proxima_col = juego->homero.posicion.col += 1;
+        else if(movimiento == MOVIMIENTO_DERECHA){
+            proxima_col += 1;
         }
-        else if(movimiento == 'a'){
-            proxima_col = juego->homero.posicion.col += -1;
+        else if(movimiento == MOVIMIENTO_IZQUIERDA){
+            proxima_col += -1;
         }  
-        if(posicion_en_rango(proxima_fil, proxima_col) && !es_pared(juego, proxima_fil, proxima_col)){
+        if(posicion_en_rango(proxima_fil, proxima_col) && !(es_pared(juego, proxima_fil, proxima_col))){
             juego->homero.posicion.fil = proxima_fil;
             juego->homero.posicion.col = proxima_col;
         }
@@ -112,14 +124,7 @@ void realizar_jugada(juego_t *juego, char movimiento){
     }
 }
 
-bool movimiento_valido(juego_t juego, char movimiento){
-    bool es_valido = false;
-    
-    es_valido = (movimiento == 'w' || movimiento == 'a' || movimiento == 's' || movimiento == 'd');
-    if(!es_valido){
-        printf("Movimiento no valido, por favor ingrese un movimiento valido (w, a, s, d)\n");
-    }
-    return es_valido;
-    //si el movimiento es valido, actualizar la posicion de homero
-    //si el movimiento no es valido, restar una vida a homero
+int estado_nivel(nivel_t nivel, personaje_t homero){
+    int estado = 0;
+    return estado;
 }
