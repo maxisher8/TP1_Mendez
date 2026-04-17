@@ -49,6 +49,18 @@ void inicializar_homero(juego_t *juego){
     juego->homero.antorcha_encendida = false;
 }
 
+void inicializar_totems(juego_t *juego){
+    objeto_t totems[5];
+    srand ((unsigned)time(NULL)); 
+    for (int i = 0; i < 5; i++) {
+        totems[i].tipo = 'T';
+        totems[i].posicion.fil = rand() % 20 + 0;
+        totems[i].posicion.col = rand() % 30 + 0;
+        printf("El valor aleatorio es: fila =  %i\n", totems[i].posicion.fil);
+        printf("El valor aleatorio es: columna = %i\n", totems[i].posicion.col);
+    }
+}
+
 void inicializar_juego(juego_t *juego){
     juego->nivel_actual = 1;
     juego->tope_niveles = 1;
@@ -56,7 +68,7 @@ void inicializar_juego(juego_t *juego){
 
     obtener_mapa(juego->niveles[1].paredes, &juego->niveles[1].tope_paredes, juego->niveles[1].camino, &juego->niveles[1].tope_camino, 1);
     inicializar_homero(juego);
-    //inicializar los 5 totems con posiciones randoms
+    inicializar_totems(juego);
     //obstaculos
 }
 
