@@ -81,6 +81,32 @@ void inicializar_pergamino(juego_t *juego){
     juego->niveles[juego->nivel_actual].pergamino.col = col_pergamino;
 }
 
+void inicializar_piedras_castigo(juego_t *juego){
+    juego->niveles[juego->nivel_actual].tope_obstaculos = 0;
+    for (int i = 0; i < 10; i++) {
+        juego->niveles[juego->nivel_actual].obstaculos[juego->niveles[juego->nivel_actual].tope_obstaculos].tipo = 'R';
+        juego->niveles[juego->nivel_actual].obstaculos[juego->niveles[juego->nivel_actual].tope_obstaculos].posicion.fil = rand() % 20 + 0;
+        juego->niveles[juego->nivel_actual].obstaculos[juego->niveles[juego->nivel_actual].tope_obstaculos].posicion.col = rand() % 30 + 0;
+        if((es_homero(juego, juego->niveles[juego->nivel_actual].obstaculos[juego->niveles[juego->nivel_actual].tope_obstaculos].posicion.fil, juego->niveles[juego->nivel_actual].obstaculos[juego->niveles[juego->nivel_actual].tope_obstaculos].posicion.col)) || (es_pared(juego, juego->niveles[juego->nivel_actual].obstaculos[juego->niveles[juego->nivel_actual].tope_obstaculos].posicion.fil, juego->niveles[juego->nivel_actual].obstaculos[juego->niveles[juego->nivel_actual].tope_obstaculos].posicion.col))){
+            i--;
+        }
+        else{
+            juego->niveles[juego->nivel_actual].tope_obstaculos++;
+        }
+    }
+}
+
+void inicializar_catapulta(juego_t *juego){
+    juego->niveles[juego->nivel_actual].obstaculos[juego->niveles[juego->nivel_actual].tope_obstaculos].tipo = 'F';
+    do
+    {
+        juego->niveles[juego->nivel_actual].obstaculos[juego->niveles[juego->nivel_actual].tope_obstaculos].posicion.fil = rand() % 20 + 0;
+        juego->niveles[juego->nivel_actual].obstaculos[juego->niveles[juego->nivel_actual].tope_obstaculos].posicion.col = rand() % 30 + 0;
+    } while (!(es_pared(juego, juego->niveles[juego->nivel_actual].obstaculos[juego->niveles[juego->nivel_actual].tope_obstaculos].posicion.fil, juego->niveles[juego->nivel_actual].obstaculos[juego->niveles[juego->nivel_actual].tope_obstaculos].posicion.col)));
+    juego->niveles[juego->nivel_actual].tope_obstaculos++;
+    
+}
+
 void inicializar_juego(juego_t *juego){
     srand ((unsigned)time(NULL)); 
     juego->nivel_actual = 1;
@@ -90,7 +116,8 @@ void inicializar_juego(juego_t *juego){
     inicializar_homero(juego);
     inicializar_pergamino(juego);
     inicializar_totems(juego);
-    //obstaculos
+    inicializar_piedras_castigo(juego);
+    inicializar_catapulta(juego);
 }
 
 void mostrar_juego(juego_t juego){
@@ -110,6 +137,12 @@ void mostrar_juego(juego_t juego){
     }
     //agregar validaciones para que no se pise a homero, runa, altar, etc.
 
+    for (int i = 0; i < nivel_actual.tope_herramientas; i++) {
+        int fil = nivel_actual.herramientas[i].posicion.fil;
+        int col = nivel_actual.herramientas[i].posicion.col;
+        mapa[fil][col] = nivel_actual.herramientas[i].tipo;
+    }
+
     
  
     mapa[juego.niveles[1].camino[0].fil][juego.niveles[1].camino[0].col] = 'U';
@@ -118,13 +151,13 @@ void mostrar_juego(juego_t juego){
 
     mapa[juego.niveles[juego.nivel_actual].pergamino.fil][juego.niveles[juego.nivel_actual].pergamino.col] = 'P';
 
-    for (int i = 0; i < nivel_actual.tope_herramientas; i++) {
-        int fil = nivel_actual.herramientas[i].posicion.fil;
-        int col = nivel_actual.herramientas[i].posicion.col;
-        mapa[fil][col] = nivel_actual.herramientas[i].tipo;
-    }
-
     mapa[juego.homero.posicion.fil][juego.homero.posicion.col] = HOMERO;
+
+    for (int i = 0; i < nivel_actual.tope_obstaculos; i++) {
+        int fil = nivel_actual.obstaculos[i].posicion.fil;
+        int col = nivel_actual.obstaculos[i].posicion.col;
+        mapa[fil][col] = nivel_actual.obstaculos[i].tipo;
+    }
     
     for (int i = 0; i < MAX_FILAS; i++) {
         for (int j = 0; j < MAX_COLUMNAS; j++) {
@@ -132,6 +165,7 @@ void mostrar_juego(juego_t juego){
         }
         printf("\n");
     }
+
 }
 
 bool movimiento_valido(juego_t juego, char movimiento){
@@ -144,6 +178,7 @@ bool movimiento_valido(juego_t juego, char movimiento){
     return es_valido;
 }
 
+//Homero no puede pararse sobre algo que no sea camino (no puede pisar paredes ni vacios)
 void realizar_jugada(juego_t *juego, char movimiento){
 
     int proxima_fil = juego->homero.posicion.fil;
