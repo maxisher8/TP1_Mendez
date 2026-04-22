@@ -18,6 +18,8 @@ const char MOVIMIENTO_ARRIBA = 'W';
 const char MOVIMIENTO_IZQUIERDA = 'A';
 const char MOVIMIENTO_ABAJO = 'S';
 const char MOVIMIENTO_DERECHA = 'D';
+const char MOVIMIENTO_USO_HECHIZO = 'H';
+const char MOVIMIENTO_USO_ANTORCHA = 'L';
 
 //Validaciones
 
@@ -196,6 +198,13 @@ void inicializar_juego(juego_t *juego){
     inicializar_catapulta(juego);
 }
 
+void camino_visible(juego_t *juego){
+    if(juego->homero.posicion.fil == juego->niveles[juego->nivel_actual].camino[0].fil && juego->homero.posicion.col == juego->niveles[juego->nivel_actual].camino[0].col){
+        printf("¡Has revelado el camino! Ahora puedes ver el camino completo en el mapa.\n");
+        juego->camino_visible = true;
+    } 
+}
+
 void mostrar_juego(juego_t juego){
     char mapa[MAX_FILAS][MAX_COLUMNAS];
 
@@ -231,21 +240,25 @@ void mostrar_juego(juego_t juego){
         int col = juego.niveles[juego.nivel_actual].obstaculos[i].posicion.col;
         mapa[fil][col] = juego.niveles[juego.nivel_actual].obstaculos[i].tipo;
     }
-    
-    for (int i = 0; i < MAX_FILAS; i++) {
-        for (int j = 0; j < MAX_COLUMNAS; j++) {
-            printf("%c ", mapa[i][j]);
+    camino_visible(&juego);
+
+    if(juego.camino_visible){
+        for (int i = 0; i < MAX_FILAS; i++) {
+            for (int j = 0; j < MAX_COLUMNAS; j++) {
+                printf("%c ", mapa[i][j]);
+            }
+            printf("\n");
         }
-        printf("\n");
     }
 }
+
 
 bool movimiento_valido(juego_t juego, char movimiento){
     bool es_valido = false;
 
-    es_valido = (movimiento == MOVIMIENTO_ARRIBA || movimiento == MOVIMIENTO_IZQUIERDA || movimiento == MOVIMIENTO_ABAJO || movimiento == MOVIMIENTO_DERECHA);
+    es_valido = ((movimiento == MOVIMIENTO_ARRIBA) || (movimiento == MOVIMIENTO_IZQUIERDA) || (movimiento == MOVIMIENTO_ABAJO) || (movimiento == MOVIMIENTO_DERECHA) || (movimiento == MOVIMIENTO_USO_HECHIZO && juego.homero.hechizos_reveladores > 0) || (movimiento == MOVIMIENTO_USO_ANTORCHA && juego.homero.antorchas > 0));
     if(!es_valido){
-        printf("Movimiento no valido, por favor ingrese un movimiento valido (W, A, S ,D)\n");
+        printf("Movimiento no valido, por favor ingrese un movimiento valido (W, A, S, D, H, L)\n");
     }
     return es_valido;
 }
@@ -305,12 +318,37 @@ void realizar_accion(juego_t *juego, int proxima_fil, int proxima_col){
     }
 }
 
+bool movimiento_uso_herramienta(juego_t juego, char movimiento){
+    bool uso_herramienta = (movimiento == MOVIMIENTO_USO_HECHIZO && juego.homero.hechizos_reveladores > 0) || (movimiento == MOVIMIENTO_USO_ANTORCHA && juego.homero.antorchas > 0);
+    
+    return uso_herramienta;
+}
+
+void uso_herramienta(juego_t *juego, char movimiento){
+    if(movimiento == MOVIMIENTO_USO_HECHIZO && juego->homero.hechizos_reveladores > 0){
+        printf("¡Has usado un hechizo revelador! Ahora tienes %d hechizos.\n", juego->homero.hechizos_reveladores - 1);
+        juego->homero.hechizos_reveladores--;
+        juego->camino_visible = true;
+    }
+    else if(movimiento == MOVIMIENTO_USO_ANTORCHA && juego->homero.antorchas > 0){
+        printf("¡Has usado una antorcha! Ahora tienes %d antorchas.\n", juego->homero.antorchas - 1);
+        juego->homero.antorchas--;
+        // Implementar lógica para mostrar paredes adyacentes
+    }
+}
+
 void realizar_jugada(juego_t *juego, char movimiento){
 
     int proxima_fil = juego->homero.posicion.fil;
     int proxima_col = juego->homero.posicion.col;
+
+    /* El efecto de revelado por hechizo dura solo la jugada actual. */
+    juego->camino_visible = false;
     
     if(movimiento_valido(*juego, movimiento)){
+        if(movimiento_uso_herramienta(*juego, movimiento)){
+            uso_herramienta(juego, movimiento);
+        }
         pre_armar_jugada(juego, movimiento, &proxima_fil, &proxima_col);
         realizar_accion(juego, proxima_fil, proxima_col);
     }
