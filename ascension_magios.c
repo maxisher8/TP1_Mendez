@@ -9,11 +9,19 @@ const char PARED = 'X';
 const char CAMINO = ' ';
 const char ESPACIO_VACIO = '-';
 const char HOMERO = 'H';
+const char PERGAMINO = 'P';
+const char TOTEM = 'T';
+const char PIEDRA_CASTIGO = 'R';
+const char CATAPULTA = 'F';
+const char RUNA = 'U';
+const char ALTAR = 'A';
 const int PRIMER_POSICION_COL = 0;
 const int PRIMER_POSICION_FIL = 0;
 const int CANTIDAD_VIDAS_INICIALES = 5;
 const int CANTIDAD_HECHIZOS_INICIALES = 5;
 const int CANTIDAD_ANTORCHAS_INICIALES = 5;
+const int CANTIDAD_TOTEMS = 5;
+const int CANTIDAD_PIEDRAS_CASTIGO = 10;
 const char MOVIMIENTO_ARRIBA = 'W';
 const char MOVIMIENTO_IZQUIERDA = 'A';
 const char MOVIMIENTO_ABAJO = 'S';
@@ -47,8 +55,8 @@ bool es_homero(juego_t juego, int fil, int col){
     }
 }
 
-bool es_pergamino(juego_t *juego, int fil, int col){
-    bool es_pergamino = juego->niveles[juego->nivel_actual].pergamino.fil == fil && juego->niveles[juego->nivel_actual].pergamino.col == col;
+bool es_pergamino(juego_t juego, int fil, int col){
+    bool es_pergamino = juego.niveles[juego.nivel_actual].pergamino.fil == fil && juego.niveles[juego.nivel_actual].pergamino.col == col;
     if(es_pergamino){
         return true;
     }
@@ -84,7 +92,7 @@ bool es_camino(juego_t juego, int fil, int col){
 
 bool es_totem(juego_t juego, int fil, int col){
     for (int i = 0; i < juego.niveles[juego.nivel_actual].tope_herramientas; i++) {
-        if (juego.niveles[juego.nivel_actual].herramientas[i].posicion.fil == fil && juego.niveles[juego.nivel_actual].herramientas[i].posicion.col == col && juego.niveles[juego.nivel_actual].herramientas[i].tipo == 'T') {
+        if (juego.niveles[juego.nivel_actual].herramientas[i].posicion.fil == fil && juego.niveles[juego.nivel_actual].herramientas[i].posicion.col == col && juego.niveles[juego.nivel_actual].herramientas[i].tipo == TOTEM) {
             return true;
         }
     }
@@ -102,7 +110,7 @@ bool es_piedra_castigo(juego_t juego, int fil, int col){
 
 //CAMBIAR NOMBRE DE LA FUNCION ES_VALIDO 
 bool es_valido(juego_t juego, int fil, int col){
-    if(es_homero(juego, fil, col) || es_pared(juego, fil, col) || es_pergamino(&juego, fil, col) || es_runa(juego, fil, col) || es_altar(juego, fil, col) || es_totem(juego, fil, col)){
+    if(es_homero(juego, fil, col) || es_pared(juego, fil, col) || es_pergamino(juego, fil, col) || es_runa(juego, fil, col) || es_altar(juego, fil, col) || es_totem(juego, fil, col)){
         return false;
     }
     return true;
@@ -114,8 +122,6 @@ bool es_vacio(juego_t juego, int fil, int col){
     }
     return false;
 }
-
-//restar/sumar vidas segun el movimiento
 
 void restar_vida(juego_t *juego, int fil, int col){
     juego->homero.vidas_restantes--; 
@@ -141,8 +147,8 @@ void inicializar_homero(juego_t *juego){
 
 void inicializar_totems(juego_t *juego){
     juego->niveles[juego->nivel_actual].tope_herramientas = 0;
-    for (int i = 0; i < 5; i++) {
-        juego->niveles[juego->nivel_actual].herramientas[juego->niveles[juego->nivel_actual].tope_herramientas].tipo = 'T';
+    for (int i = 0; i < CANTIDAD_TOTEMS; i++) {
+        juego->niveles[juego->nivel_actual].herramientas[juego->niveles[juego->nivel_actual].tope_herramientas].tipo = TOTEM;
         juego->niveles[juego->nivel_actual].herramientas[juego->niveles[juego->nivel_actual].tope_herramientas].posicion.fil = rand() % 20 + 0;
         juego->niveles[juego->nivel_actual].herramientas[juego->niveles[juego->nivel_actual].tope_herramientas].posicion.col = rand() % 30 + 0;
         if(es_valido(*juego, juego->niveles[juego->nivel_actual].herramientas[juego->niveles[juego->nivel_actual].tope_herramientas].posicion.fil, juego->niveles[juego->nivel_actual].herramientas[juego->niveles[juego->nivel_actual].tope_herramientas].posicion.col)){
@@ -153,22 +159,22 @@ void inicializar_totems(juego_t *juego){
         }
     }
 }
-
+//pergamino puede inicializarse en espacio vacio?
 void inicializar_pergamino(juego_t *juego){
-    int fil_pergamino = rand() % 20 + 0;
-    int col_pergamino = rand() % 30 + 0;
-    while((es_camino(*juego, fil_pergamino, col_pergamino)) && !(es_homero(*juego, fil_pergamino, col_pergamino)) && !(es_runa(*juego, fil_pergamino, col_pergamino)) && !(es_altar(*juego, fil_pergamino, col_pergamino)) && !(es_pared(*juego, fil_pergamino, col_pergamino))){
+    int fil_pergamino = -1;
+    int col_pergamino = -1;
+    do{
         fil_pergamino = rand() % 20 + 0;
         col_pergamino = rand() % 30 + 0;
-    }
+    } while(!(es_camino(*juego, fil_pergamino, col_pergamino)) || es_homero(*juego, fil_pergamino, col_pergamino) || es_runa(*juego, fil_pergamino, col_pergamino) || es_altar(*juego, fil_pergamino, col_pergamino));
     juego->niveles[juego->nivel_actual].pergamino.fil = fil_pergamino;
     juego->niveles[juego->nivel_actual].pergamino.col = col_pergamino;
 }
 
 void inicializar_piedras_castigo(juego_t *juego){
     juego->niveles[juego->nivel_actual].tope_obstaculos = 0;
-    for (int i = 0; i < 10; i++) {
-        juego->niveles[juego->nivel_actual].obstaculos[juego->niveles[juego->nivel_actual].tope_obstaculos].tipo = 'R';
+    for (int i = 0; i < CANTIDAD_PIEDRAS_CASTIGO; i++) {
+        juego->niveles[juego->nivel_actual].obstaculos[juego->niveles[juego->nivel_actual].tope_obstaculos].tipo = PIEDRA_CASTIGO;
         juego->niveles[juego->nivel_actual].obstaculos[juego->niveles[juego->nivel_actual].tope_obstaculos].posicion.fil = rand() % 20 + 0;
         juego->niveles[juego->nivel_actual].obstaculos[juego->niveles[juego->nivel_actual].tope_obstaculos].posicion.col = rand() % 30 + 0;
         if((es_valido(*juego, juego->niveles[juego->nivel_actual].obstaculos[juego->niveles[juego->nivel_actual].tope_obstaculos].posicion.fil, juego->niveles[juego->nivel_actual].obstaculos[juego->niveles[juego->nivel_actual].tope_obstaculos].posicion.col))){
@@ -181,7 +187,7 @@ void inicializar_piedras_castigo(juego_t *juego){
 }
 
 void inicializar_catapulta(juego_t *juego){
-    juego->niveles[juego->nivel_actual].obstaculos[juego->niveles[juego->nivel_actual].tope_obstaculos].tipo = 'F';
+    juego->niveles[juego->nivel_actual].obstaculos[juego->niveles[juego->nivel_actual].tope_obstaculos].tipo = CATAPULTA;
     do
     {
         juego->niveles[juego->nivel_actual].obstaculos[juego->niveles[juego->nivel_actual].tope_obstaculos].posicion.fil = rand() % 20 + 0;
@@ -204,7 +210,7 @@ void inicializar_juego(juego_t *juego){
 }
 
 void camino_visible(juego_t *juego){
-    if(juego->homero.posicion.fil == juego->niveles[juego->nivel_actual].camino[0].fil && juego->homero.posicion.col == juego->niveles[juego->nivel_actual].camino[0].col){
+    if((juego->homero.posicion.fil == juego->niveles[juego->nivel_actual].camino[0].fil && juego->homero.posicion.col == juego->niveles[juego->nivel_actual].camino[0].col)){
         printf("¡Has revelado el camino! Ahora puedes ver el camino completo en el mapa.\n");
         juego->camino_visible = true;
     } 
@@ -235,15 +241,13 @@ void crear_mapa(char mapa[MAX_FILAS][MAX_COLUMNAS], juego_t juego){
         mapa[fil][col] = juego.niveles[juego.nivel_actual].herramientas[i].tipo;
     }
 
-    mapa[juego.niveles[juego.nivel_actual].camino[0].fil][juego.niveles[juego.nivel_actual].camino[0].col] = 'U';
+    mapa[juego.niveles[juego.nivel_actual].camino[0].fil][juego.niveles[juego.nivel_actual].camino[0].col] = RUNA;
 
-    mapa[juego.niveles[juego.nivel_actual].camino[juego.niveles[juego.nivel_actual].tope_camino - 1].fil][juego.niveles[juego.nivel_actual].camino[juego.niveles[juego.nivel_actual].tope_camino - 1].col] = 'A';
+    mapa[juego.niveles[juego.nivel_actual].camino[juego.niveles[juego.nivel_actual].tope_camino - 1].fil][juego.niveles[juego.nivel_actual].camino[juego.niveles[juego.nivel_actual].tope_camino - 1].col] = ALTAR;
 
-    mapa[juego.niveles[juego.nivel_actual].pergamino.fil][juego.niveles[juego.nivel_actual].pergamino.col] = 'P';
+    mapa[juego.niveles[juego.nivel_actual].pergamino.fil][juego.niveles[juego.nivel_actual].pergamino.col] = PERGAMINO;
 
     mapa[juego.homero.posicion.fil][juego.homero.posicion.col] = HOMERO;
-
-    
 }
     
 void mostrar_juego(juego_t juego){
@@ -262,7 +266,6 @@ void mostrar_juego(juego_t juego){
         }
     }
 }
-
 
 bool movimiento_valido(juego_t juego, char movimiento){
     bool es_valido = false;
@@ -330,6 +333,14 @@ void realizar_accion(juego_t *juego, int proxima_fil, int proxima_col){
         if(es_piedra_castigo(*juego, proxima_fil, proxima_col)){
             inicializar_pergamino(juego);
             printf("¡Has pisado una piedra de castigo! El pergamino cambio de posición.\n");
+            juego->homero.recolecto_pergamino = false;
+        }
+        if(es_pergamino(*juego, proxima_fil, proxima_col)){
+            printf("¡Has recolectado el pergamino! Ahora llevalo hasta el altar!.\n");
+            juego->homero.recolecto_pergamino = true;
+            juego->niveles[juego->nivel_actual].pergamino.fil = -1;
+            juego->niveles[juego->nivel_actual].pergamino.col = -1;
+            juego->camino_visible = true;
         }
     }
     else {
