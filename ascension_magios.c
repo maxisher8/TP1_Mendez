@@ -198,10 +198,10 @@ void inicializar_catapulta(juego_t *juego){
 }
 
 void inicializar_juego(juego_t *juego){
-    juego->nivel_actual = 1;
-    juego->tope_niveles = 1;
+    juego->nivel_actual = 0;
+    juego->tope_niveles = 0;
     juego->camino_visible = false;
-    obtener_mapa(juego->niveles[1].paredes, &juego->niveles[1].tope_paredes, juego->niveles[1].camino, &juego->niveles[1].tope_camino, 1);
+    obtener_mapa(juego->niveles[juego->nivel_actual].paredes, &juego->niveles[juego->nivel_actual].tope_paredes, juego->niveles[juego->nivel_actual].camino, &juego->niveles[juego->nivel_actual].tope_camino, 1);
     inicializar_homero(juego);
     inicializar_pergamino(juego);
     inicializar_totems(juego);
@@ -210,11 +210,11 @@ void inicializar_juego(juego_t *juego){
 }
 
 void cambiar_nivel(juego_t *juego){
-    if (juego->nivel_actual == MAX_NIVELES) {
-        printf("¡Has completado todos los niveles!\n");
+    
+    if(estado_juego(*juego) != 0){
         return;
     }
-
+    
     juego->nivel_actual++;
 
     if (juego->tope_niveles < juego->nivel_actual) {
@@ -456,6 +456,9 @@ int estado_juego(juego_t juego){
     int estado = 0;
     if(juego.homero.vidas_restantes == 0){
         estado = -1;
+    }
+    else if(juego.nivel_actual == MAX_NIVELES - 1 && estado_nivel(juego.niveles[juego.nivel_actual], juego.homero) == 1){
+        estado = 1;
     }
     return estado;
 }
