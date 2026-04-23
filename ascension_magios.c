@@ -331,11 +331,25 @@ void mostrar_juego(juego_t juego){
     camino_visible(&juego);
 
     printf("Nivel actual: %d\n", juego.nivel_actual);
-    //juego.camino_visible
-    if(true){
+
+    if(juego.camino_visible){
         for (int i = 0; i < MAX_FILAS; i++) {
             for (int j = 0; j < MAX_COLUMNAS; j++) {
                 printf("%c ", mapa[i][j]);
+            }
+            printf("\n");
+        }
+    }
+    else if(juego.homero.antorcha_encendida){
+        for (int i = 0; i < MAX_FILAS; i++) {
+            for (int j = 0; j < MAX_COLUMNAS; j++) {
+                int distancia_manhattan = abs(juego.homero.posicion.fil - i) + abs(juego.homero.posicion.col - j);
+                if(distancia_manhattan <= 3){
+                    printf("%c ", mapa[i][j]);
+                }
+                else{
+                    printf("%c ", ESPACIO_VACIO);
+                }
             }
             printf("\n");
         }
@@ -471,7 +485,7 @@ void uso_herramienta(juego_t *juego, char movimiento){
     else if(movimiento == MOVIMIENTO_USO_ANTORCHA && juego->homero.antorchas > 0){
         printf("¡Has usado una antorcha! Ahora tienes %d antorchas.\n", juego->homero.antorchas - 1);
         juego->homero.antorchas--;
-        // Implementar lógica para mostrar paredes cercanas
+        juego->homero.antorcha_encendida = true;
     }
 }
 
@@ -481,6 +495,7 @@ void realizar_jugada(juego_t *juego, char movimiento){
     int proxima_col = juego->homero.posicion.col;
 
     juego->camino_visible = false;
+    juego->homero.antorcha_encendida = false;
     
     if(movimiento_valido(*juego, movimiento)){
         if(movimiento_uso_herramienta(*juego, movimiento)){
