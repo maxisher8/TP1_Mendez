@@ -15,6 +15,7 @@ const char PIEDRA_CASTIGO = 'R';
 const char CATAPULTA = 'F';
 const char RUNA = 'U';
 const char ALTAR = 'A';
+const char MOVIMIENTO_INVALIDO = 'Q';
 const int PRIMER_POSICION_COL = 0;
 const int PRIMER_POSICION_FIL = 0;
 const int CANTIDAD_VIDAS_INICIALES = 5;
@@ -77,7 +78,7 @@ bool es_pergamino(coordenada_t pergamino, int fil, int col){
     }
 }
 
-bool es_runa(coordenada_t camino[MAX_CAMINO], int tope_camino, int fil, int col){
+bool es_runa(coordenada_t camino[MAX_CAMINO], int fil, int col){
     bool es_runa = (camino[0].fil == fil) && (camino[0].col == col);
     if(es_runa){
         return true;
@@ -122,7 +123,7 @@ bool es_piedra_castigo(objeto_t obstaculos[MAX_ELEMENTOS], int tope_obstaculos, 
 
 //CAMBIAR NOMBRE DE LA FUNCION ES_VALIDO 
 bool es_valido(nivel_t nivel, personaje_t homero, int fil, int col){
-    if(es_homero(homero, fil, col) || es_pared(nivel.paredes, nivel.tope_paredes, fil, col) || es_pergamino(nivel.pergamino, fil, col) || es_runa(nivel.camino, nivel.tope_camino, fil, col) || es_altar(nivel.camino, nivel.tope_camino, fil, col) || es_totem(nivel.herramientas, nivel.tope_herramientas, fil, col)){
+    if(es_homero(homero, fil, col) || es_pared(nivel.paredes, nivel.tope_paredes, fil, col) || es_pergamino(nivel.pergamino, fil, col) || es_runa(nivel.camino, fil, col) || es_altar(nivel.camino, nivel.tope_camino, fil, col) || es_totem(nivel.herramientas, nivel.tope_herramientas, fil, col)){
         return false;
     }
     return true;
@@ -161,8 +162,8 @@ void inicializar_totems(juego_t *juego){
     juego->niveles[juego->nivel_actual - 1].tope_herramientas = 0;
     for (int i = 0; i < CANTIDAD_TOTEMS; i++) {
         juego->niveles[juego->nivel_actual - 1].herramientas[juego->niveles[juego->nivel_actual - 1].tope_herramientas].tipo = TOTEM;
-        juego->niveles[juego->nivel_actual - 1].herramientas[juego->niveles[juego->nivel_actual - 1].tope_herramientas].posicion.fil = rand() % 20 + 0;
-        juego->niveles[juego->nivel_actual - 1].herramientas[juego->niveles[juego->nivel_actual - 1].tope_herramientas].posicion.col = rand() % 30 + 0;
+        juego->niveles[juego->nivel_actual - 1].herramientas[juego->niveles[juego->nivel_actual - 1].tope_herramientas].posicion.fil = rand() % MAX_FILAS;
+        juego->niveles[juego->nivel_actual - 1].herramientas[juego->niveles[juego->nivel_actual - 1].tope_herramientas].posicion.col = rand() % MAX_COLUMNAS;
         if(es_valido(juego->niveles[juego->nivel_actual - 1], juego->homero, juego->niveles[juego->nivel_actual - 1].herramientas[juego->niveles[juego->nivel_actual - 1].tope_herramientas].posicion.fil, juego->niveles[juego->nivel_actual - 1].herramientas[juego->niveles[juego->nivel_actual - 1].tope_herramientas].posicion.col)){
             juego->niveles[juego->nivel_actual - 1].tope_herramientas += 1;
         }
@@ -176,9 +177,9 @@ void inicializar_pergamino(juego_t *juego){
     int fil_pergamino = -1;
     int col_pergamino = -1;
     do{
-        fil_pergamino = rand() % 20 + 0;
-        col_pergamino = rand() % 30 + 0;
-    } while(!(es_camino(juego->niveles[juego->nivel_actual - 1].camino, juego->niveles[juego->nivel_actual - 1].tope_camino, fil_pergamino, col_pergamino)) || es_homero(juego->homero, fil_pergamino, col_pergamino) || es_runa(juego->niveles[juego->nivel_actual - 1].camino, juego->niveles[juego->nivel_actual - 1].tope_camino, fil_pergamino, col_pergamino) || es_altar(juego->niveles[juego->nivel_actual - 1].camino, juego->niveles[juego->nivel_actual - 1].tope_camino, fil_pergamino, col_pergamino));
+        fil_pergamino = rand() % MAX_FILAS;
+        col_pergamino = rand() % MAX_COLUMNAS;
+    } while(!(es_camino(juego->niveles[juego->nivel_actual - 1].camino, juego->niveles[juego->nivel_actual - 1].tope_camino, fil_pergamino, col_pergamino)) || es_homero(juego->homero, fil_pergamino, col_pergamino) || es_runa(juego->niveles[juego->nivel_actual - 1].camino, fil_pergamino, col_pergamino) || es_altar(juego->niveles[juego->nivel_actual - 1].camino, juego->niveles[juego->nivel_actual - 1].tope_camino, fil_pergamino, col_pergamino));
     juego->niveles[juego->nivel_actual - 1].pergamino.fil = fil_pergamino;
     juego->niveles[juego->nivel_actual - 1].pergamino.col = col_pergamino;
 }
@@ -187,8 +188,8 @@ void inicializar_piedras_castigo(juego_t *juego){
     juego->niveles[juego->nivel_actual - 1].tope_obstaculos = 0;
     for (int i = 0; i < CANTIDAD_PIEDRAS_CASTIGO; i++) {
         juego->niveles[juego->nivel_actual - 1].obstaculos[juego->niveles[juego->nivel_actual - 1].tope_obstaculos].tipo = PIEDRA_CASTIGO;
-        juego->niveles[juego->nivel_actual - 1].obstaculos[juego->niveles[juego->nivel_actual - 1].tope_obstaculos].posicion.fil = rand() % 20 + 0;
-        juego->niveles[juego->nivel_actual - 1].obstaculos[juego->niveles[juego->nivel_actual - 1].tope_obstaculos].posicion.col = rand() % 30 + 0;
+        juego->niveles[juego->nivel_actual - 1].obstaculos[juego->niveles[juego->nivel_actual - 1].tope_obstaculos].posicion.fil = rand() % MAX_FILAS;
+        juego->niveles[juego->nivel_actual - 1].obstaculos[juego->niveles[juego->nivel_actual - 1].tope_obstaculos].posicion.col = rand() % MAX_COLUMNAS;
         if((es_valido(juego->niveles[juego->nivel_actual - 1], juego->homero, juego->niveles[juego->nivel_actual - 1].obstaculos[juego->niveles[juego->nivel_actual - 1].tope_obstaculos].posicion.fil, juego->niveles[juego->nivel_actual - 1].obstaculos[juego->niveles[juego->nivel_actual - 1].tope_obstaculos].posicion.col))){
             juego->niveles[juego->nivel_actual - 1].tope_obstaculos += 1;
         }
@@ -202,8 +203,8 @@ void inicializar_catapulta(juego_t *juego){
     juego->niveles[juego->nivel_actual - 1].obstaculos[juego->niveles[juego->nivel_actual - 1].tope_obstaculos].tipo = CATAPULTA;
     do
     {
-        juego->niveles[juego->nivel_actual - 1].obstaculos[juego->niveles[juego->nivel_actual - 1].tope_obstaculos].posicion.fil = rand() % 20 + 0;
-        juego->niveles[juego->nivel_actual - 1].obstaculos[juego->niveles[juego->nivel_actual - 1].tope_obstaculos].posicion.col = rand() % 30 + 0;
+        juego->niveles[juego->nivel_actual - 1].obstaculos[juego->niveles[juego->nivel_actual - 1].tope_obstaculos].posicion.fil = rand() % MAX_FILAS;
+        juego->niveles[juego->nivel_actual - 1].obstaculos[juego->niveles[juego->nivel_actual - 1].tope_obstaculos].posicion.col = rand() % MAX_COLUMNAS;
     } while ((es_camino(juego->niveles[juego->nivel_actual - 1].camino, juego->niveles[juego->nivel_actual - 1].tope_camino, juego->niveles[juego->nivel_actual - 1].obstaculos[juego->niveles[juego->nivel_actual - 1].tope_obstaculos].posicion.fil, juego->niveles[juego->nivel_actual - 1].obstaculos[juego->niveles[juego->nivel_actual - 1].tope_obstaculos].posicion.col)) || !es_valido(juego->niveles[juego->nivel_actual - 1], juego->homero, juego->niveles[juego->nivel_actual - 1].obstaculos[juego->niveles[juego->nivel_actual - 1].tope_obstaculos].posicion.fil, juego->niveles[juego->nivel_actual - 1].obstaculos[juego->niveles[juego->nivel_actual - 1].tope_obstaculos].posicion.col));
 
     juego->niveles[juego->nivel_actual - 1].tope_obstaculos += 1;
@@ -230,15 +231,15 @@ void eliminar_camino(coordenada_t camino[MAX_CAMINO], int *tope_camino, int indi
     (*tope_camino)--;
     printf("Camino eliminado en la posición %d.\n", *tope_camino);
 }
-
+//cambiar el do while por un while normal
 void eliminar_random(juego_t *juego){
-    int fil_a_eliminar = rand() % 20 + 0;
-    int col_a_eliminar = rand() % 30 + 0;
+    int fil_a_eliminar = rand() % MAX_FILAS;
+    int col_a_eliminar = rand() % MAX_COLUMNAS;
     do
     {
-        fil_a_eliminar = rand() % 20 + 0;
-        col_a_eliminar = rand() % 30 + 0;
-    } while (es_homero(juego->homero, fil_a_eliminar, col_a_eliminar) || es_runa(juego->niveles[juego->nivel_actual - 1].camino, juego->niveles[juego->nivel_actual - 1].tope_camino, fil_a_eliminar, col_a_eliminar) || es_altar(juego->niveles[juego->nivel_actual - 1].camino, juego->niveles[juego->nivel_actual - 1].tope_camino, fil_a_eliminar, col_a_eliminar) || es_pared(juego->niveles[juego->nivel_actual - 1].paredes, juego->niveles[juego->nivel_actual - 1].tope_paredes, fil_a_eliminar, col_a_eliminar) || es_pergamino(juego->niveles[juego->nivel_actual - 1].pergamino, fil_a_eliminar, col_a_eliminar));
+        fil_a_eliminar = rand() % MAX_FILAS;
+        col_a_eliminar = rand() % MAX_COLUMNAS;
+    } while (es_homero(juego->homero, fil_a_eliminar, col_a_eliminar) || es_runa(juego->niveles[juego->nivel_actual - 1].camino, fil_a_eliminar, col_a_eliminar) || es_altar(juego->niveles[juego->nivel_actual - 1].camino, juego->niveles[juego->nivel_actual - 1].tope_camino, fil_a_eliminar, col_a_eliminar) || es_pared(juego->niveles[juego->nivel_actual - 1].paredes, juego->niveles[juego->nivel_actual - 1].tope_paredes, fil_a_eliminar, col_a_eliminar) || es_pergamino(juego->niveles[juego->nivel_actual - 1].pergamino, fil_a_eliminar, col_a_eliminar));
     if(es_camino(juego->niveles[juego->nivel_actual - 1].camino, juego->niveles[juego->nivel_actual - 1].tope_camino, fil_a_eliminar, col_a_eliminar)){
         int indice_camino = posicion_camino_buscado(juego->niveles[juego->nivel_actual - 1].camino, juego->niveles[juego->nivel_actual - 1].tope_camino, fil_a_eliminar, col_a_eliminar);
         eliminar_camino(juego->niveles[juego->nivel_actual - 1].camino, &juego->niveles[juego->nivel_actual - 1].tope_camino, indice_camino);
@@ -250,7 +251,7 @@ void eliminar_random(juego_t *juego){
 }
 
 void activar_catapulta(juego_t *juego, char movimiento){
-    if(es_runa(juego->niveles[juego->nivel_actual - 1].camino, juego->niveles[juego->nivel_actual - 1].tope_camino, juego->homero.posicion.fil, juego->homero.posicion.col) || movimiento == MOVIMIENTO_USO_HECHIZO){
+    if(es_runa(juego->niveles[juego->nivel_actual - 1].camino, juego->homero.posicion.fil, juego->homero.posicion.col) || movimiento == MOVIMIENTO_USO_HECHIZO){
         printf("¡Has activado la catapulta! .\n");
         eliminar_random(juego);
     }
@@ -289,7 +290,7 @@ void cambiar_nivel(juego_t *juego){
 }
 
 void camino_visible(juego_t *juego){
-    if(es_runa(juego->niveles[juego->nivel_actual - 1].camino, juego->niveles[juego->nivel_actual - 1].tope_camino, juego->homero.posicion.fil, juego->homero.posicion.col) || es_pergamino(juego->niveles[juego->nivel_actual - 1].pergamino, juego->homero.posicion.fil, juego->homero.posicion.col)){
+    if(es_runa(juego->niveles[juego->nivel_actual - 1].camino, juego->homero.posicion.fil, juego->homero.posicion.col) || es_pergamino(juego->niveles[juego->nivel_actual - 1].pergamino, juego->homero.posicion.fil, juego->homero.posicion.col)){
         printf("¡Has revelado el camino! Ahora puedes ver el camino completo en el mapa.\n");
         juego->camino_visible = true;
     } 
@@ -364,7 +365,7 @@ void mostrar_juego(juego_t juego){
 bool movimiento_valido(juego_t juego, char movimiento){
     bool es_valido = false;
 
-    es_valido = ((movimiento == MOVIMIENTO_ARRIBA) || (movimiento == MOVIMIENTO_IZQUIERDA) || (movimiento == MOVIMIENTO_ABAJO) || (movimiento == MOVIMIENTO_DERECHA) || (movimiento == MOVIMIENTO_USO_HECHIZO && juego.homero.hechizos_reveladores > 0) || (movimiento == MOVIMIENTO_USO_ANTORCHA && juego.homero.antorchas > 0));
+    es_valido = ((movimiento == MOVIMIENTO_ARRIBA) || (movimiento == MOVIMIENTO_IZQUIERDA) || (movimiento == MOVIMIENTO_ABAJO) || (movimiento == MOVIMIENTO_DERECHA) || ((movimiento == MOVIMIENTO_USO_HECHIZO) && (juego.homero.hechizos_reveladores > 0)) || ((movimiento == MOVIMIENTO_USO_ANTORCHA) && (juego.homero.antorchas > 0)));
     if(!es_valido){
         printf("Movimiento no valido, por favor ingrese un movimiento valido (W, A, S, D, H, L)\n");
     }
@@ -463,9 +464,9 @@ void realizar_accion(juego_t *juego, int proxima_fil, int proxima_col){
             juego->niveles[juego->nivel_actual - 1].pergamino.fil = juego->homero.posicion.fil;
             juego->niveles[juego->nivel_actual - 1].pergamino.col = juego->homero.posicion.col;
         }
-        if(es_runa(juego->niveles[juego->nivel_actual - 1].camino, juego->niveles[juego->nivel_actual - 1].tope_camino, proxima_fil, proxima_col)){
+        if(es_runa(juego->niveles[juego->nivel_actual - 1].camino, proxima_fil, proxima_col)){
             juego->camino_visible = true;
-            activar_catapulta(juego, 'Q');
+            activar_catapulta(juego, MOVIMIENTO_INVALIDO);
         }
         estado = estado_nivel(juego->niveles[juego->nivel_actual - 1], juego->homero);
         if(estado == 1){
@@ -478,7 +479,7 @@ void realizar_accion(juego_t *juego, int proxima_fil, int proxima_col){
 }
 
 bool es_movimiento_herramienta(personaje_t homero, coordenada_t camino[MAX_CAMINO], int tope_camino, char movimiento){
-    bool uso_herramienta = ((movimiento == MOVIMIENTO_USO_HECHIZO && homero.hechizos_reveladores > 0) || (movimiento == MOVIMIENTO_USO_ANTORCHA && homero.antorchas > 0)) && !(es_runa(camino, tope_camino, homero.posicion.fil, homero.posicion.col));
+    bool uso_herramienta = ((movimiento == MOVIMIENTO_USO_HECHIZO && homero.hechizos_reveladores > 0) || (movimiento == MOVIMIENTO_USO_ANTORCHA && homero.antorchas > 0)) && !(es_runa(camino, homero.posicion.fil, homero.posicion.col));
     
     return uso_herramienta;
 }
@@ -523,7 +524,7 @@ void realizar_jugada(juego_t *juego, char movimiento){
             printf("No podes usar herramientas estando sobre la runa.\n");
         }
 
-        if(es_runa(juego->niveles[juego->nivel_actual - 1].camino, juego->niveles[juego->nivel_actual - 1].tope_camino, juego->homero.posicion.fil, juego->homero.posicion.col)){
+        if(es_runa(juego->niveles[juego->nivel_actual - 1].camino, juego->homero.posicion.fil, juego->homero.posicion.col)){
             juego->camino_visible = true;
         }
     }
@@ -531,7 +532,7 @@ void realizar_jugada(juego_t *juego, char movimiento){
 
 int estado_nivel(nivel_t nivel, personaje_t homero){
     int estado = 0;
-    if(homero.recolecto_pergamino && homero.posicion.fil == nivel.camino[nivel.tope_camino - 1].fil && homero.posicion.col == nivel.camino[nivel.tope_camino - 1].col){
+    if((homero.recolecto_pergamino) && (homero.posicion.fil == nivel.camino[nivel.tope_camino - 1].fil) && (homero.posicion.col == nivel.camino[nivel.tope_camino - 1].col)){
         printf("¡Has llegado al altar con el pergamino! Has completado el nivel.\n");
         estado = 1;
     }
@@ -540,7 +541,7 @@ int estado_nivel(nivel_t nivel, personaje_t homero){
 
 int estado_juego(juego_t juego){
     int estado = 0;
-    if(juego.nivel_actual == MAX_NIVELES && estado_nivel(juego.niveles[juego.nivel_actual - 1], juego.homero) == 1){
+    if((juego.nivel_actual == MAX_NIVELES) && (estado_nivel(juego.niveles[juego.nivel_actual - 1], juego.homero) == 1)){
         estado = 1;
     }
     else if(juego.homero.vidas_restantes == 0){
