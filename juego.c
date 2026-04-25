@@ -10,13 +10,10 @@ int main(){
     char movimiento = 'q';
     inicializar_juego(&juego);
     mostrar_juego(juego);
-    while(estado_juego(juego) == 0){
+    while(estado_nivel(juego.niveles[juego.nivel_actual - 1], juego.homero) == 0 && estado_juego(juego) == 0){
         printf("ingrese un movimiento");
         scanf(" %c", &movimiento);
         realizar_jugada(&juego, movimiento);
-        if(estado_nivel(juego.niveles[juego.nivel_actual - 1], juego.homero) == 1 && juego.nivel_actual < MAX_NIVELES){
-            cambiar_nivel(&juego);
-        }
         mostrar_juego(juego);
     }
     if(estado_juego(juego) == -1){
