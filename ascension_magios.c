@@ -32,14 +32,18 @@ const char MOVIMIENTO_USO_ANTORCHA = 'L';
 const int DISTANCIA_MANHATTAN_MAXIMA = 3;
 
 /*------funciones a implementar------
+    realizar_accion --> sin timeout
 1. mover_homero
 2. realizar_efecto_totem
 3. realizar_efecto_piedra
 4. verificar_cambio_nivel
+    mostrar_juego --> sin timeout
 5. imprimir_mapa_completo
 6. imprimir_mapa_antorcha
+    inicializar_totems/piedras/catapulta --> sin timeout
 7. generar_posicion_random
 8. impacto_camino_bola_de_fuego
+    realizar_jugada --> sin timeout
 9. detectar_tipo_entrada
 */
 
@@ -185,8 +189,7 @@ void inicializar_totems(juego_t *juego){
     juego->niveles[juego->nivel_actual - 1].tope_herramientas = 0;
     for (int i = 0; i < CANTIDAD_TOTEMS; i++) {
         juego->niveles[juego->nivel_actual - 1].herramientas[juego->niveles[juego->nivel_actual - 1].tope_herramientas].tipo = TOTEM;
-        juego->niveles[juego->nivel_actual - 1].herramientas[juego->niveles[juego->nivel_actual - 1].tope_herramientas].posicion.fil = rand() % MAX_FILAS;
-        juego->niveles[juego->nivel_actual - 1].herramientas[juego->niveles[juego->nivel_actual - 1].tope_herramientas].posicion.col = rand() % MAX_COLUMNAS;
+        generar_posicion_random(&(juego->niveles[juego->nivel_actual - 1].herramientas[juego->niveles[juego->nivel_actual - 1].tope_herramientas].posicion));
         if(es_valido(juego->niveles[juego->nivel_actual - 1], juego->homero, juego->niveles[juego->nivel_actual - 1].herramientas[juego->niveles[juego->nivel_actual - 1].tope_herramientas].posicion.fil, juego->niveles[juego->nivel_actual - 1].herramientas[juego->niveles[juego->nivel_actual - 1].tope_herramientas].posicion.col)){
             juego->niveles[juego->nivel_actual - 1].tope_herramientas += 1;
         }
@@ -215,8 +218,7 @@ void inicializar_piedras_castigo(juego_t *juego){
     juego->niveles[juego->nivel_actual - 1].tope_obstaculos = 0;
     for (int i = 0; i < CANTIDAD_PIEDRAS_CASTIGO; i++) {
         juego->niveles[juego->nivel_actual - 1].obstaculos[juego->niveles[juego->nivel_actual - 1].tope_obstaculos].tipo = PIEDRA_CASTIGO;
-        juego->niveles[juego->nivel_actual - 1].obstaculos[juego->niveles[juego->nivel_actual - 1].tope_obstaculos].posicion.fil = rand() % MAX_FILAS;
-        juego->niveles[juego->nivel_actual - 1].obstaculos[juego->niveles[juego->nivel_actual - 1].tope_obstaculos].posicion.col = rand() % MAX_COLUMNAS;
+        generar_posicion_random(&(juego->niveles[juego->nivel_actual - 1].obstaculos[juego->niveles[juego->nivel_actual - 1].tope_obstaculos].posicion));
         if((es_valido(juego->niveles[juego->nivel_actual - 1], juego->homero, juego->niveles[juego->nivel_actual - 1].obstaculos[juego->niveles[juego->nivel_actual - 1].tope_obstaculos].posicion.fil, juego->niveles[juego->nivel_actual - 1].obstaculos[juego->niveles[juego->nivel_actual - 1].tope_obstaculos].posicion.col))){
             juego->niveles[juego->nivel_actual - 1].tope_obstaculos += 1;
         }
@@ -267,20 +269,19 @@ void impacto_camino_bola_de_fuego(juego_t *juego, coordenada_t posicion_a_elimin
 }
 
 void eliminar_random(juego_t *juego){
-    int fil_a_eliminar = rand() % MAX_FILAS;
-    int col_a_eliminar = rand() % MAX_COLUMNAS;
+
+    coordenada_t posicion_a_eliminar;
+
     do
     {
-        fil_a_eliminar = rand() % MAX_FILAS;
-        col_a_eliminar = rand() % MAX_COLUMNAS;
-    } while (es_homero(juego->homero, fil_a_eliminar, col_a_eliminar) || es_runa(juego->niveles[juego->nivel_actual - 1].camino, fil_a_eliminar, col_a_eliminar) || es_altar(juego->niveles[juego->nivel_actual - 1].camino, juego->niveles[juego->nivel_actual - 1].tope_camino, fil_a_eliminar, col_a_eliminar) || es_pared(juego->niveles[juego->nivel_actual - 1].paredes, juego->niveles[juego->nivel_actual - 1].tope_paredes, fil_a_eliminar, col_a_eliminar) || es_pergamino(juego->niveles[juego->nivel_actual - 1].pergamino, fil_a_eliminar, col_a_eliminar));
-    if(es_camino(juego->niveles[juego->nivel_actual - 1].camino, juego->niveles[juego->nivel_actual - 1].tope_camino, fil_a_eliminar, col_a_eliminar)){
-        int indice_camino = posicion_camino_buscado(juego->niveles[juego->nivel_actual - 1].camino, juego->niveles[juego->nivel_actual - 1].tope_camino, fil_a_eliminar, col_a_eliminar);
-        eliminar_camino(juego->niveles[juego->nivel_actual - 1].camino, &juego->niveles[juego->nivel_actual - 1].tope_camino, indice_camino);
-        printf("¡La bola de fuego destruyó parte del camino en (%d, %d)!\n", fil_a_eliminar, col_a_eliminar);
+        generar_posicion_random(&posicion_a_eliminar);
+
+    } while (es_homero(juego->homero, posicion_a_eliminar.fil, posicion_a_eliminar.col) || es_runa(juego->niveles[juego->nivel_actual - 1].camino, posicion_a_eliminar.fil, posicion_a_eliminar.col) || es_altar(juego->niveles[juego->nivel_actual - 1].camino, juego->niveles[juego->nivel_actual - 1].tope_camino, posicion_a_eliminar.fil, posicion_a_eliminar.col) || es_pared(juego->niveles[juego->nivel_actual - 1].paredes, juego->niveles[juego->nivel_actual - 1].tope_paredes, posicion_a_eliminar.fil, posicion_a_eliminar.col) || es_pergamino(juego->niveles[juego->nivel_actual - 1].pergamino, posicion_a_eliminar.fil, posicion_a_eliminar.col));
+    if(es_camino(juego->niveles[juego->nivel_actual - 1].camino, juego->niveles[juego->nivel_actual - 1].tope_camino, posicion_a_eliminar.fil, posicion_a_eliminar.col)){
+        impacto_camino_bola_de_fuego(juego, (coordenada_t){posicion_a_eliminar.fil, posicion_a_eliminar.col});
     }
     else{
-        printf("La bola de fuego cayó en (%d, %d) y no destruyó camino.\n", fil_a_eliminar, col_a_eliminar);
+        printf("La bola de fuego cayó en (%d, %d) y no destruyó camino.\n", posicion_a_eliminar.fil, posicion_a_eliminar.col);
     }
 }
 
@@ -397,27 +398,10 @@ void mostrar_juego(juego_t juego){
     camino_visible(&juego);
     
     if(juego.camino_visible){
-        printf("\n        ------------Nivel actual: %d ------------\n \n", juego.nivel_actual);
-        for (int i = 0; i < MAX_FILAS; i++) {
-            for (int j = 0; j < MAX_COLUMNAS; j++) {
-                printf("%c ", mapa[i][j]);
-            }
-            printf("\n");
-        }
+        imprimir_mapa_completo(mapa);
     }
     else if(juego.homero.antorcha_encendida){
-        for (int i = 0; i < MAX_FILAS; i++) {
-            for (int j = 0; j < MAX_COLUMNAS; j++) {
-                int distancia_manhattan = abs(juego.homero.posicion.fil - i) + abs(juego.homero.posicion.col - j);
-                if(distancia_manhattan <= 3){
-                    printf("%c ", mapa[i][j]);
-                }
-                else{
-                    printf("%c ", ESPACIO_VACIO);
-                }
-            }
-            printf("\n");
-        }
+        imprimir_mapa_antorcha(mapa, juego.homero.posicion);
     }
 }
 
@@ -518,30 +502,22 @@ void verificar_cambio_nivel(juego_t *juego){
 }
 
 void realizar_accion(juego_t *juego, int proxima_fil, int proxima_col){
-    int indice_totem = -1;
-    int indice_piedra = -1;
-    int estado = 0;
+
     if(es_pared(juego->niveles[juego->nivel_actual - 1].paredes, juego->niveles[juego->nivel_actual - 1].tope_paredes, proxima_fil, proxima_col)){
-        //restar_vida(juego);
         printf("Has chocado con una pared.\n");
     }
     else if(posicion_en_rango(proxima_fil, proxima_col)){
-        juego->homero.posicion.fil = proxima_fil;
-        juego->homero.posicion.col = proxima_col;
+
+        mover_homero(juego, proxima_fil, proxima_col);
+
         if(es_vacio(juego->niveles[juego->nivel_actual - 1].paredes, juego->niveles[juego->nivel_actual - 1].tope_paredes, juego->niveles[juego->nivel_actual - 1].camino, juego->niveles[juego->nivel_actual - 1].tope_camino, proxima_fil, proxima_col)){
             restar_vida(&juego->homero);
         }
         if(es_totem(juego->niveles[juego->nivel_actual - 1].herramientas, juego->niveles[juego->nivel_actual - 1].tope_herramientas, proxima_fil, proxima_col)){
-            sumar_vida(&juego->homero);
-            indice_totem = posicion_totem_buscado(juego->niveles[juego->nivel_actual - 1].herramientas, juego->niveles[juego->nivel_actual - 1].tope_herramientas, proxima_fil, proxima_col);
-            eliminar_totem(juego->niveles[juego->nivel_actual - 1].herramientas, &juego->niveles[juego->nivel_actual - 1].tope_herramientas, indice_totem);
+            realizar_efecto_totem(juego, proxima_fil, proxima_col);
         }
         if(es_piedra_castigo(juego->niveles[juego->nivel_actual - 1].obstaculos, juego->niveles[juego->nivel_actual - 1].tope_obstaculos, proxima_fil, proxima_col)){
-            inicializar_pergamino(juego);
-            printf("¡Has pisado una piedra de castigo! El pergamino cambio de posición.\n");
-            juego->homero.recolecto_pergamino = false;
-            indice_piedra = posicion_piedra_buscado(juego->niveles[juego->nivel_actual - 1].obstaculos, juego->niveles[juego->nivel_actual - 1].tope_obstaculos, proxima_fil, proxima_col);
-            eliminar_piedra(juego->niveles[juego->nivel_actual - 1].obstaculos, &juego->niveles[juego->nivel_actual - 1].tope_obstaculos, indice_piedra);
+            realizar_efecto_piedra(juego, proxima_fil, proxima_col);
         }
         if(es_pergamino(juego->niveles[juego->nivel_actual - 1].pergamino, proxima_fil, proxima_col)){
             printf("¡Has recolectado el pergamino! Ahora llevalo hasta el altar!.\n");
@@ -556,10 +532,7 @@ void realizar_accion(juego_t *juego, int proxima_fil, int proxima_col){
             juego->camino_visible = true;
             activar_catapulta(juego, MOVIMIENTO_INVALIDO);
         }
-        estado = estado_nivel(juego->niveles[juego->nivel_actual - 1], juego->homero);
-        if(estado == 1){
-            cambiar_nivel(juego);
-        }
+        verificar_cambio_nivel(juego);
     }
     else {
         printf("Movimiento fuera de rango. Por favor, intenta un movimiento diferente.\n");
@@ -614,25 +587,9 @@ void realizar_jugada(juego_t *juego, char movimiento){
     int proxima_col = juego->homero.posicion.col;
 
     juego->camino_visible = false;
-    if(es_movimiento_direccion(movimiento)){
-        juego->homero.antorcha_encendida = false;
-    }
     
-    if(movimiento_valido(*juego, movimiento)){
-        if(es_movimiento_herramienta(juego->homero, juego->niveles[juego->nivel_actual - 1].camino, juego->niveles[juego->nivel_actual - 1].tope_camino, movimiento)){
-            uso_herramienta(juego, movimiento);
-        }
-        else if(es_movimiento_direccion(movimiento)){
-            pre_armar_jugada(movimiento, &proxima_fil, &proxima_col);
-            realizar_accion(juego, proxima_fil, proxima_col);
-        }
-        else{
-            printf("No podes usar herramientas estando sobre la runa.\n");
-        }
-
-        if(es_runa(juego->niveles[juego->nivel_actual - 1].camino, juego->homero.posicion.fil, juego->homero.posicion.col)){
-            juego->camino_visible = true;
-        }
+    if(movimiento_valido(*juego, movimiento)){  
+        detectar_tipo_entrada(juego, movimiento, proxima_fil, proxima_col);
     }
 }
 
