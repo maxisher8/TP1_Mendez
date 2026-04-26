@@ -13,6 +13,7 @@ void jugar_juego(juego_t juego){
     char movimiento = 'q';
     while(estado_nivel(juego.niveles[juego.nivel_actual - 1], juego.homero) == 0 && estado_juego(juego) == 0){
         pedir_movimiento(&movimiento);
+        system("clear");
         realizar_jugada(&juego, movimiento);
         mostrar_juego(juego);
     }
